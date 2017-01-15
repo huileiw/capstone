@@ -9,9 +9,10 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = 'livingSocial'
+BOT_NAME = 'goodreadsbook'
+ROBOTSTXT_OBEY = True
 
-SPIDER_MODULES = ['scraper_app.spiders']
+SPIDER_MODULES = ['book_scraper.spiders']
 # NEWSPIDER_MODULE = 'LivingSocial.spiders'
 
 DATABASE = {
@@ -23,7 +24,43 @@ DATABASE = {
     'database': 'scrape'
 }
 
-ITEM_PIPELINES = {'scraper_app.pipelines.LivingSocialPipeline':300}
+ITEM_PIPELINES = {'book_scraper.pipelines.GoodReadslPipeline':300}
+
+DOWNLOAD_DELAY = 1
+CLOSESPIDER_ITEMCOUNT=10000
+
+######################### PROXY SETTING ############################
+# Retry many times since proxies often fail
+#RETRY_TIMES = 2
+# Retry on most error codes since proxies fail for different reasons
+#RETRY_HTTP_CODES = [500, 503, 504, 400, 403, 404, 408]
+
+DOWNLOADER_MIDDLEWARES = {
+ #   'scrapy.downloadermiddlewares.retry.RetryMiddleware': 90,
+ #   'scrapy_proxies.RandomProxy': 100,
+ #   'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 110,
+    'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
+    'scrapy_fake_useragent.middleware.RandomUserAgentMiddleware': 400
+}
+
+# Proxy list containing entries like
+# http://host1:port
+# http://username:password@host2:port
+# http://host3:port
+# ...
+#PROXY_LIST = '/Users/HelenWang/OneDrive/Python/Scrapy/proxy.txt'
+
+# Proxy mode
+# 0 = Every requests have different proxy
+# 1 = Take only one proxy from the list and assign it to every requests
+# 2 = Put a custom proxy to use in the settings
+#PROXY_MODE = 0
+
+# If proxy mode is 2 uncomment this sentence :
+#CUSTOM_PROXY = "http://host1:port"
+###################### END PROXY SETTING ############################
+
+RANDOM_UA_PER_PROXY = True
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'LivingSocial (+http://www.yourdomain.com)'
