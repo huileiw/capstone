@@ -9,10 +9,10 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = 'goodreadsbook'
+BOT_NAME = 'recipescraper'
 ROBOTSTXT_OBEY = True
 
-SPIDER_MODULES = ['book_scraper.spiders']
+SPIDER_MODULES = ['recipe_scraper.spiders']
 # NEWSPIDER_MODULE = 'LivingSocial.spiders'
 
 DATABASE = {
@@ -24,7 +24,7 @@ DATABASE = {
     'database': 'scrape'
 }
 
-ITEM_PIPELINES = {'book_scraper.pipelines.GoodReadslPipeline':300}
+ITEM_PIPELINES = {'recipe_scraper.pipelines.AllRecipesPipeline':300}
 
 DOWNLOAD_DELAY = 1
 CLOSESPIDER_ITEMCOUNT=10000

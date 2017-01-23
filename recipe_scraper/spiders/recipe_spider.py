@@ -10,8 +10,8 @@ from scrapy.http import FormRequest, Request
 
 from recipe_scraper.items import Recipe
 
-class RecipeSpider(CrawlSpider):
-    name = "recipes"
+class RecipeSpider(SitemapSpider):
+    name = "recipe_spider"
     allowed_domains = ["allrecipes.com"]
     sitemap_urls = ["http://dish.allrecipes.com/faq-sitemap/"]
     start_urls = ["http://allrecipes.com/recipes/",
@@ -34,12 +34,12 @@ class RecipeSpider(CrawlSpider):
     item_fields = {
         'title': '//h1[@class="recipe-summary__h1"]/text()',
         'desc': '//div[@class="submitter__description"]/text()',
-        'by' : '//span[@class="submitter__name"]/text()'
-        'no_made_it': '//span[@class="made-it-count ng-binding"]/text()'
-        'no_reviews': '//a[@class="read--reviews"]/span[@class="review-count"]/text()'
+        'by' : '//span[@class="submitter__name"]/text()',
+        'no_made_it': '//span[@class="made-it-count ng-binding"]/text()',
+        'no_reviews': '//a[@class="read--reviews"]/span[@class="review-count"]/text()',
         #'no_ratings': 
-        'rating': '//span[@itemprop="aggregateRating"]/meta[@itemprop="ratingValue"]/@content'
-        'servings': '//span[@ng-bind="adjustedServings"]/text()'
+        'rating': '//span[@itemprop="aggregateRating"]/meta[@itemprop="ratingValue"]/@content',
+        'servings': '//span[@ng-bind="adjustedServings"]/text()',
         #'cals': '//span[@class="calorie-count"]/text()'
         #'cals_unit': '//span[@class="calorie-count__desc"]/text()'
         #'prep_time': 
@@ -47,7 +47,7 @@ class RecipeSpider(CrawlSpider):
         #'ready_in': 
         #'no_ingre': 
         #'no_steps': 
-        'ingre': '//li[@class="checkList__line"]//span[@itemprop="ingredients"]/text()'
+        'ingre': '//li[@class="checkList__line"]//span[@itemprop="ingredients"]/text()',
         'steps': '//ol[@itemprop="recipeInstructions"]//span[@class="recipe-directions__list--item"]/text()'
     }
 
@@ -89,7 +89,7 @@ class RecipeSpider(CrawlSpider):
 
     def parse_nutrition(self,response):
         data = json.loads(response.body)['nutrition']
-        d = dict{}
+        d = dict()
         d['ntri_cals'] = data['calories']['amount'].strip() + ' ' + data['calories']['unit'].strip()
         d['ntri_cals_fat']  = data['caloriesFromFat']['amount'].strip() + ' ' + data['caloriesFromFat']['unit'].strip()
         d['ntri_tt_fat']  = data['fat']['amount'].strip() + ' ' + data['fat']['unit'].strip()
