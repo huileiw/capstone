@@ -11,13 +11,14 @@ from scrapy.item import Item, Field
 class Recipe(Item):
     #bookID = Field()
     title = Field()
+    recipe_id = Field()
     desc = Field()
     by = Field()
     no_made_it = Field()
     no_reviews = Field()
     no_ratings = Field()
     rating = Field()
-    servings = Field()
+    #servings = Field()
     prep_time = Field()
     cook_time = Field()
     ready_in = Field()
@@ -25,6 +26,11 @@ class Recipe(Item):
     no_steps = Field()
     ingre = Field()
     steps = Field()
+    Cat1 = Field()
+    Cat2 = Field()
+    Cat3 = Field()
+    Cat4 = Field()
+    """
     ntri_cals = Field()
     ntri_cals_fat  = Field()
     ntri_tt_fat  = Field()
@@ -45,5 +51,6 @@ class Recipe(Item):
     ntri_vB6  = Field()
     ntri_magnsm  = Field()
     ntri_folate  = Field()
+    """
 
     

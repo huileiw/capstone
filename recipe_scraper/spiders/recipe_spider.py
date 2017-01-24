@@ -10,58 +10,47 @@ from scrapy.http import FormRequest, Request
 
 from recipe_scraper.items import Recipe
 
-class RecipeSpider(SitemapSpider):
+class RecipeSpider(CrawlSpider):
     name = "recipe_spider"
     allowed_domains = ["allrecipes.com"]
-    sitemap_urls = ["http://dish.allrecipes.com/faq-sitemap/"]
-    start_urls = ["http://allrecipes.com/recipes/",
-                    "http://allrecipes.com/recipe/"]
+    #sitemap_urls = ["http://dish.allrecipes.com/faq-sitemap/"]
+    start_urls = ['http://allrecipes.com/recipes/?grouping=all',
+                    "http://allrecipes.com/recipes/",
+                    "http://allrecipes.com/recipe/"
+                ]
 
     rules = (
         Rule(
             LinkExtractor(allow=r'/recipe/\d+'), callback='parse_recipe'
         ),
-    """    
+        
         Rule(
-            LinkExtractor(allow=r'/recipes/'), callback = 'parse_catalog'
+            LinkExtractor(allow=r'/recipes/'), follow = True #, callback = 'parse_catalog'
         ),
-    """
+        
     )
 
     #quotes_base_url = 'https://apps.allrecipes.com/v1/assets/hub-feed?id={}&pageNumber={}&isSponsored=true&sortType=p'
-    post_nutri_url = 'https://apps.allrecipes.com/v1/recipes/{}?fields=nutrition&isMetric=false&servings={}'
-
-    item_fields = {
-        'title': '//h1[@class="recipe-summary__h1"]/text()',
-        'desc': '//div[@class="submitter__description"]/text()',
-        'by' : '//span[@class="submitter__name"]/text()',
-        'no_made_it': '//span[@class="made-it-count ng-binding"]/text()',
-        'no_reviews': '//a[@class="read--reviews"]/span[@class="review-count"]/text()',
-        #'no_ratings': 
-        'rating': '//span[@itemprop="aggregateRating"]/meta[@itemprop="ratingValue"]/@content',
-        'servings': '//span[@ng-bind="adjustedServings"]/text()',
-        #'cals': '//span[@class="calorie-count"]/text()'
-        #'cals_unit': '//span[@class="calorie-count__desc"]/text()'
-        #'prep_time': 
-        #'cook_time': 
-        #'ready_in': 
-        #'no_ingre': 
-        #'no_steps': 
-        'ingre': '//li[@class="checkList__line"]//span[@itemprop="ingredients"]/text()',
-        'steps': '//ol[@itemprop="recipeInstructions"]//span[@class="recipe-directions__list--item"]/text()'
-    }
+    #post_nutri_url = 'https://apps.allrecipes.com/v1/recipes/{}?fields=nutrition&isMetric=false&servings={}'
 
     
     def parse_recipe(self, response):
         #if randomSampling and random.random() > samplingProbability:
         item = Recipe()
 
-        for field,xpath in self.item_fields.iteritems():
-            item[field] = response.xpath(xpath).extract()
+        #for field,xpath in self.item_fields.iteritems():
+        #   item[field] = response.xpath(xpath).extract()[0]
 
-        #other items fields:
-        item['no_ratings'] = re.findall(r".+?(?= )",response.xpath('//ol//h4[@class="helpful-header"]/text()').extract())[0]
-
+        item['title'] = response.xpath('//h1[@class="recipe-summary__h1"]/text()').extract()[0]
+        item['recipe_id'] = re.findall(r"recipe\/(\d+)\/", response.url)[0]
+        item['desc'] = response.xpath('//div[@class="submitter__description"]/text()').extract()[0].strip()[1:-1]
+        item['by'] = response.xpath('//span[@class="submitter__name"]/text()').extract()[0]
+        item['no_made_it'] = re.findall(r'init\((\d+),', response.xpath('//div[@class="summary-stats-box"]/div[@class="total-made-it"]').css("div.total-made-it").extract()[0])[0]
+        item['no_reviews'] = re.findall(r'\d+', response.xpath('//a[@class="read--reviews"]/span[@class="review-count"]/text()').extract()[0])[0]
+        item['no_ratings'] = re.findall(r".+?(?= )",response.xpath('//ol//h4[@class="helpful-header"]/text()').extract()[0])[0]
+        item['rating'] = response.xpath('//span[@itemprop="aggregateRating"]/meta[@itemprop="ratingValue"]/@content').extract()[0]
+        #item['servings'] = response.xpath('//span[@ng-bind="adjustedServings"]/text()').extract()[0]
+        
         prep_time_digit = response.xpath('//time[@itemprop="prepTime"]/span[@class="prepTime__item--time"]/text()').extract()
         prep_time_unit = response.xpath('//time[@itemprop="prepTime"]/text()').extract()
         item['prep_time'] = ''.join([''.join((prep_time_digit[i], prep_time_unit[i])) for i in xrange(min(len(prep_time_digit), len(prep_time_unit)))])
@@ -77,16 +66,26 @@ class RecipeSpider(SitemapSpider):
         item['no_ingre'] = len(response.xpath('//li[@class="checkList__line"]//span[@itemprop="ingredients"]/text()').extract())
 
         item['no_steps'] = len(response.xpath('//ol[@itemprop="recipeInstructions"]//span[@class="recipe-directions__list--item"]/text()').extract())
+        item['ingre'] = response.xpath('//li[@class="checkList__line"]//span[@itemprop="ingredients"]/text()').extract()
+        item['steps'] = response.xpath('//ol[@itemprop="recipeInstructions"]//span[@class="recipe-directions__list--item"]/text()').extract()
+        
+        Cats = response.xpath('//ul[@class="breadcrumbs breadcrumbs"]//span[@class="toggle-similar__title"]/text()').extract()
 
+        for i in xrange(2,6):
+            cat = "Cat{}".format(str(i-1))
+            try:
+                exec ("item['" + cat + "']" + ' = Cats[{}].strip()'.format(str(i)))
+            except:
+                exec ("item['" + cat + "']"  + ' = ""')
         #nutrition items
-        recipe_id = re.findall(r"recipe\/(\d+)\/", response.url)[0]
-        servings = response.xpath('//span[@ng-bind="adjustedServings"]/text()').extract
-        nutri_dict = FormRequest(self.post_nutri_url.format(recipe_id,servings), callback = self.parse_nutrition)
-        for key, value in nutri_dict.iteritems():
-            item[key] = value
+        
+        #servings = response.xpath('//span[@ng-bind="adjustedServings"]/text()').extract()
+        #nutri_dict = FormRequest(self.post_nutri_url.format(recipe_id,servings), callback = self.parse_nutrition)
+        #for key, value in nutri_dict.iteritems():
+        #    item[key] = value
 
         yield item
-
+    """    
     def parse_nutrition(self,response):
         data = json.loads(response.body)['nutrition']
         d = dict()
@@ -111,7 +110,7 @@ class RecipeSpider(SitemapSpider):
         d['ntri_magnsm']  = data['magnesium']['amount'].strip() + ' ' + data['magnesium']['unit'].strip()
         d['ntri_folate']  = data['folate']['amount'].strip() + ' ' + data['folate']['unit'].strip()
         return d
-
+    """
 """
     def parse_catalog(self, response):
         if not response.Selector.xpath("//button[@class='btns-one-small']"):

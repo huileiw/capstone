@@ -17,13 +17,14 @@ class Recipe(DeclarativeBase):
 
     id = Column(Integer,primary_key = True)
     title = Column('title', String)
+    recipe_id = Column('recipe_id', String)
     desc = Column('desc', String, nullable = True)
     by = Column('by', String, nullable = True)
     no_made_it = Column('no_made_it', Integer, nullable = True)
     no_reviews = Column('no_reviews', Integer, nullable = True)
     no_ratings = Column('no_ratings', Integer, nullable = True)
     rating = Column('rating', Float, nullable = True)
-    servings = Column('servings', Integer, nullable = True)
+    #servings = Column('servings', Integer, nullable = True)
     prep_time = Column('prep_time', String, nullable = True)
     cook_time = Column('cook_time', String, nullable = True)
     ready_in = Column('ready_in', String, nullable = True)
@@ -31,6 +32,11 @@ class Recipe(DeclarativeBase):
     no_steps = Column('no_steps', Integer, nullable = True)
     ingre = Column('ingre', String, nullable = True)
     steps = Column('steps', String, nullable = True)
+    Cat1 = Column('Cat1', String, nullable = True)
+    Cat2 = Column('Cat2', String, nullable = True)
+    Cat3 = Column('Cat3', String, nullable = True)
+    Cat4 = Column('Cat4', String, nullable = True)
+    """
     ntri_cals = Column('ntri_cals', Float, nullable = True)
     ntri_cals_fat  = Column('ntri_cals_fat', Float, nullable = True)
     ntri_tt_fat  = Column('ntri_tt_fat', Float, nullable = True)
@@ -51,5 +57,5 @@ class Recipe(DeclarativeBase):
     ntri_vB6  = Column('ntri_vB6', Float, nullable = True)
     ntri_magnsm  = Column('ntri_magnsm', Float, nullable = True)
     ntri_folate  = Column('ntri_folate', Float, nullable = True)
-
+    """
     

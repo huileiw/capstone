@@ -26,6 +26,7 @@ DATABASE = {
 
 ITEM_PIPELINES = {'recipe_scraper.pipelines.AllRecipesPipeline':300}
 
+
 DOWNLOAD_DELAY = 1
 CLOSESPIDER_ITEMCOUNT=10000
 
@@ -66,7 +67,7 @@ RANDOM_UA_PER_PROXY = True
 #USER_AGENT = 'LivingSocial (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
-#ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY=False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
